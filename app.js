@@ -16,7 +16,7 @@ var path = require('path');
 /*PASSPORT STRATEGY*/
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    /*User.findOne({ username: username }, function (err, user) {
+    User.findOne({ username: username }, function (err, user) {
       if (err) { return done(err); }
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
@@ -25,12 +25,12 @@ passport.use(new LocalStrategy(
         return done(null, false, { message: 'Incorrect password.' });
       }
       return done(null, user);
-    });*/
-	if(username !== 'riccardo.masetti')
+    });
+	/*if(username !== 'riccardo.masetti')
 		return done(null, false, { message: 'Incorrect username or password.' });
 	if(password !== 'rcrmst80')
 		return done(null, false, { message: 'Incorrect username or password.' });
-	return done(null,user);
+	return done(null,user);*/
   }
 ));
 passport.serializeUser(function(user, done) {

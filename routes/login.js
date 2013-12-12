@@ -7,6 +7,5 @@ exports.deploy = function(req, res){
 };
 
 exports.login = function(req, res){
-console.log(res);
     res.render('login', { title: 'Login Page' });
 };
