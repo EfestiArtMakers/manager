@@ -12,35 +12,57 @@ var user = require('./routes/user');
 var deploy = require('./routes/login')
 var http = require('http');
 var path = require('path');
+var crypto = require('crypto');
 
+var Db = require('mongodb').Db,
+    MongoClient = require('mongodb').MongoClient,
+    Server = require('mongodb').Server,
+    ObjectID = require('mongodb').ObjectID,
+    Binary = require('mongodb').Binary,
+    GridStore = require('mongodb').GridStore,
+    Grid = require('mongodb').Grid,
+    Code = require('mongodb').Code,
+    BSON = require('mongodb').pure().BSON,
+    assert = require('assert');
+
+
+var db = new Db('manager', new Server('127.0.0.1', 27017));
+var User;
 /*PASSPORT STRATEGY*/
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    User.findOne({ username: username }, function (err, user) {
-      if (err) { return done(err); }
-      if (!user) {
-        return done(null, false, { message: 'Incorrect username.' });
-      }
-      if (!user.validPassword(password)) {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-      return done(null, user);
+    // Fetch a collection to insert document into
+    db.close();
+    db.open(function(err,db){
+        User = db.collection("users");
+        User.findOne({ username: username, password: password }, function (err, user) {
+            if (err) { return done(err); }
+            if (!user) {
+                return done(null, false, { message: 'Incorrect username.' });
+            }
+            console.log(user);
+            if (user.password != password) {
+                return done(null, false, { message: 'Incorrect password.' });
+            }
+            return done(null, user);
+
+            db.close();
+        });
     });
-	/*if(username !== 'riccardo.masetti')
-		return done(null, false, { message: 'Incorrect username or password.' });
-	if(password !== 'rcrmst80')
-		return done(null, false, { message: 'Incorrect username or password.' });
-	return done(null,user);*/
   }
 ));
+
 passport.serializeUser(function(user, done) {
-  done(null, user.id);
+    done(null, user._id);
 });
 
 passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
+    db.close();
+    db.open(function(err,db){
+        User.findOne({_id:id}, function(err, user) {
+            done(err, user);
+        });
+    });
 });
 
 var app = express();
